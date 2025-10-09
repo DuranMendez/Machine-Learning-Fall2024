@@ -1,0 +1,273 @@
+---
+title: "Machine Learning Fall - Final Project. Car Price Prediction using Machine Learning."
+author: Murpys D. Mendez
+professor: Jia Liu
+format: html
+echo: false
+---
+
+
+```{r installs}
+#install.packages("tidyverse")
+install.packages("caret")
+install.packages("rpart")
+```
+
+```{r setup}
+library(tidyverse)
+library(caret)
+library(rpart)
+library(e1071)
+library(ggplot2)
+library(dplyr)
+ 
+```
+
+```{r import}
+#import dataset
+data <- read.csv("car_prices.csv")
+```
+
+```{r}
+#exploring the data
+head(data)
+#dim(data)
+summary(data)
+
+```
+```{r}
+#removing missing values
+data <- na.omit(data)
+```
+
+```{r}
+# Scatter plot of "sellingprice" and "saledate"
+ggplot(data, aes(x = saledate, y = sellingprice)) +
+  geom_point(color = "deepskyblue3", size = 3, alpha=0.4) +
+  labs(title = "Scatter Plot", x = "Sales Date", y = "Price") +
+  theme_minimal()
+
+```
+
+
+
+```{r}
+# Scatter plot of "sellingprice" vs "seller"
+ggplot(data, aes(x = seller, y = sellingprice)) +
+  geom_point(color = "deepskyblue3", size = 3, alpha=0.4) +
+  labs(title = "Scatter Plot", x = "Sales Date", y = "Price") +
+  theme_minimal()
+
+```
+
+```{r}
+# Scatter plot of "sellingprice" vs "year"
+ggplot(data, aes(x = year, y = sellingprice)) +
+  geom_point(color = "gray", size = 3, alpha=0.4) +
+  labs(title = "Scatter Plot", x = "Sales Date", y = "Price") +
+  theme_minimal()
+
+```
+
+```{r}
+# dropping features that are of no interest to the study or have no effect on the target.
+data <- data  %>% select(-"vin",-"seller",-"saledate")
+
+```
+
+```{r}
+# Scatter plot of "sellingprice" vs "mmr"
+ggplot(data, aes(x = mmr, y = sellingprice)) +
+  geom_point(color = "gray", size = 3, alpha=0.4) +
+  labs(title = "Scatter Plot", x = "Sales Date", y = "Price") +
+  theme_minimal()
+
+```
+
+```{r}
+correlation <- cor(data$mmr, data$sellingprice, method = "pearson")
+correlation
+
+```
+
+
+```{r}
+# dropping mmr due to high correlation. this information is not generally available.
+data <- data  %>% select(-"mmr")
+
+```
+
+```{r}
+# exploring the shape of the target variable
+hist(data$sellingprice)
+q <- quantile(data$sellingprice)
+
+quantile_df <- data.frame(
+  Quantile = names(q),
+  Value = round(q, 2)
+)
+print(quantile_df)
+
+boxplot(data$sellingprice, main = "Boxplot of the Variable", ylab = "Values")
+
+```
+
+```{r}
+#cont
+#outliers <- boxplot.stats(data$sellingprice)$out
+#print(outliers)
+#summary(data$sellingprice)
+box_stats <- boxplot.stats(data$sellingprice)
+box_stats$stats
+#checking data over the upper whisker
+filtered_rows <- data[data$sellingprice > 34325, ]
+#head(filtered_rows, desc=TRUE)
+head(data[order(-data$sellingprice), ])
+
+```
+
+```{r}
+#exploring levels of "body"
+unique_values_body <- unique(data$body)
+unique_values_body
+
+```
+
+```{r}
+#exploring levels of "transmission"
+unique_values <- unique(data$transmission)
+unique_values
+
+```
+
+```{r}
+head(data[data$transmission == "", ])
+
+```
+
+```{r}
+#removing missing values
+data <- data[data$transmission != "", ]
+
+```
+
+```{r}
+#exploring state
+unique_values <- unique(data$state)
+unique_values
+
+```
+
+
+```{r}
+#encoding catewgorical variables
+#make
+freq_table <- table(data$make)
+data$make_freq <- freq_table[as.factor(data$make)]
+
+#encoding cont. model
+freq_table <- table(data$model)
+data$model_freq <- freq_table[as.factor(data$model)]
+
+#trim
+freq_table <- table(data$trim)
+data$trim_freq <- freq_table[as.factor(data$trim)]
+
+```
+
+```{r}
+#cont
+
+#body
+freq_table <- table(data$body)
+data$body_freq <- freq_table[as.factor(data$body)]
+
+#transmission
+data$transmission <- as.factor(data$transmission)
+
+#state
+freq_table <- table(data$state)
+data$state_freq <- freq_table[as.factor(data$state)]
+
+#color
+freq_table <- table(data$color)
+data$color_freq <- freq_table[as.factor(data$color)]
+
+#interior
+freq_table <- table(data$interior)
+data$interior_freq <- freq_table[as.factor(data$interior)]
+
+```
+
+```{r}
+#dividing the training and testing sets
+set.seed(123)
+n <- nrow(data)
+# Split data: 70% training, 30% testing
+train_indices <- sample(1:n, size = 0.7 * n, replace = FALSE)
+train_set <- data[train_indices, ]
+test_set <- data[-train_indices, ]
+
+```
+
+```{r}
+# fitting the model
+model <- lm(sellingprice ~ year + make_freq + model_freq + trim_freq + body_freq + transmission + state_freq + condition + odometer, data = train_set)
+summary(model)
+
+```
+
+```{r}
+#prediction
+predicted_values <- predict(tree_model, newdata = test_set)
+actual_values <- test_set$sellingprice
+mae <- MAE(predicted_values, actual_values)
+rmse <- RMSE(predicted_values, actual_values)
+r_squared <- R2(predicted_values, actual_values)
+
+```
+
+```{r}
+#print the results
+print(paste("Mean Absolute Error (MAE):", mae))
+print(paste("Root Mean Squared Error (RMSE):", rmse))
+print(paste("R-squared:", r_squared))
+
+```
+
+```{r}
+#trying a desicion tree regressor algorithm
+tree_model <- rpart(sellingprice ~ year + make_freq + model_freq + trim_freq + body_freq + transmission + state_freq + condition + odometer + color_freq + interior_freq, data = train_set, method = "anova")
+summary(tree_model)
+
+```
+
+
+```{r}
+training_set_scaled <- scale(train_set)
+testing_set_scaled <- scale(test_set)
+
+svm_model <- svm(target_variable ~ year + make_freq + model_freq + trim_freq + body_freq + transmission + state_freq + condition + odometer + color_freq + interior_freq,
+             data = training_set_scaled,
+             type = "eps-regression",
+             kernel = "linear")
+
+# View the model summary
+summary(svm_model)
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
+
+
+```{r}
+
+```
