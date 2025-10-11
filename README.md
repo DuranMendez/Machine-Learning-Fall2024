@@ -1,14 +1,20 @@
-# Machine-Learning
+## Car price prediction using machine-Learning  
 
-Machine Learning Project. A study of Car Price Prediction using various Machine Learning algorithms.
-
-To view all projects, visit the main portfolio page in the **Contact** section below.
+This paper explores the underlying principles of linear regression and demonstrates its application using a real-world dataset.
 
 ---
 
-## 📫 Contact
+***Dataset***
+- name: “Vehicles Sales Data”
+- origina: kaggle.com
+- observations: 558837
 
-**Murpys D. Mendez**  
-murpys@gmail.com  
+***software and algorithms***  
+- R
+- multiple lineaer regression
+- desicion tree regressor
+- random foresty reghressor
 
-[Portfolio Website](https://duranmendez.github.io/Data-Science-Portfolio/)
+---
+
+[View Full report](https://duranmendez.github.io/car-Price-Prediction-with-Multiple-Linear-Regression/Project_Report.pdf)
