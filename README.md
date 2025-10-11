@@ -1,4 +1,4 @@
-## Car price prediction using machine-Learning  
+## Car price prediction using multiple linear regression
 
 This paper explores the underlying principles of linear regression and demonstrates its application using a real-world dataset.
 
@@ -11,9 +11,9 @@ This paper explores the underlying principles of linear regression and demonstra
 
 ***software and algorithms***  
 - R
-- multiple lineaer regression
-- desicion tree regressor
-- random foresty reghressor
+- Multiple Linear Regression
+- Desicion Tree Regressor
+- Random Foresty Regressor
 
 ---
 
